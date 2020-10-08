@@ -17,13 +17,52 @@ Make sure you have installed following packages:
 $ npm install
 ```
 
-### Running the scitps
+### Scripts configuration
+
+Each script has its own config object inside the config.js file
+
+```
+const DB_CONFIG = {
+  host: 'localhost',
+  port: 7001,
+  password: '',
+}
+
+const POPULATE_DB_WITH_ZSETS_СONFIG = {
+  keyNameStartWith: 'key',
+  count: 10,
+}
+
+...
+
+```
+
+### Running the scripts
 
 ```bash
+# Add strings to the databse
+$ node populate-db-with-strings.js
+
 # Add zsets to the databse
-$ node populate-db-with-zsets
+$ node populate-db-with-zsets.js
+
+# Add sets to the databse
+$ node populate-db-with-sets.js
+
+# Add hashes to the databse
+$ node populate-db-with-hashes.js
+
+# Add lists to the databse
+$ node populate-db-with-lists.js
+
+# Populate zset with members
+$ node populate-zset-with-members.js
+
 
 # Delete all the keys of all the existing databases
-$ node flush-db
+$ node flush-db.js
+
+# Delete multiple keys from the selected database
+$ delete-keys-from-db.js
 
 ```
