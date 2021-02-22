@@ -49,8 +49,14 @@ $ node populate-db-with-zsets.js
 # Add sets to the databse
 $ node populate-db-with-sets.js
 
+# Populate set with members
+$ node populate-set-with-members.js
+
 # Add hashes to the databse
 $ node populate-db-with-hashes.js
+
+# Populate hash with fields
+$ node populate-hash-with-fields.js
 
 # Add lists to the databse
 $ node populate-db-with-lists.js
