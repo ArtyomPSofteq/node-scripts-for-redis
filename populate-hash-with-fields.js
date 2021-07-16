@@ -8,24 +8,26 @@ const {
 } = POPULATE_HASH_WITH_FIELDS_CONFIG;
 
 const client = redis.createClient(DB_CONFIG);
+const timeLabel = `Time for adding ${fieldsCount} fields to Hash (${keyName})`;
 
 client.on("error", function(error) {
   console.error(error);
 });
 
 client.on("connect", function() {
-  console.log('Connected to DB');
+  console.log('Connected to DB \n');
+  console.time(timeLabel);
+  const fields = [];
   for (let i = 0; i < fieldsCount; i++) {
-    const randomNumber = Math.random()
+    const randomNumber = Math.random();
     const field = `${fieldStartWith}${randomNumber}`;
     const fieldValue = `${fieldValueStartWith}${randomNumber}`;
-    client.hset([keyName, field, fieldValue], (error, response) => {
-      if (error) throw error;
-      console.log(`Added ${field} field to ${keyName} hash`);
-    } )
+    fields.push(field, fieldValue);
   }
-});
 
-function random(min, max) {
-  return Math.floor(min + Math.random() * (max - min));
-}
+  client.hset(keyName, fields, (error, response) => {
+    if (error) throw error;
+    console.timeEnd(timeLabel);
+    process.exit();
+  });
+});

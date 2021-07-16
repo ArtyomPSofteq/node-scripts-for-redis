@@ -64,6 +64,8 @@ $ node populate-db-with-lists.js
 # Populate zset with members
 $ node populate-zset-with-members.js
 
+# Populate list with elements
+$ node populate-list-with-elements.js
 
 # Delete all the keys of all the existing databases
 $ node flush-db.js

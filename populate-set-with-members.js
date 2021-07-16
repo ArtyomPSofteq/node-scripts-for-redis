@@ -7,22 +7,23 @@ const {
 } = POPULATE_SET_WITH_MEMBERS_CONFIG;
 
 const client = redis.createClient(DB_CONFIG);
+const timeLabel = `Time for adding ${membersCount} members to Set (${keyName})`;
 
 client.on("error", function(error) {
   console.error(error);
 });
 
 client.on("connect", function() {
-  console.log('Connected to DB');
+  console.log('Connected to DB \n');
+  console.time(timeLabel);
+  const members = [];
   for (let i = 0; i < membersCount; i++) {
-    const memberName = `${memberNameStartWith}${Math.random()}`
-    client.sadd([keyName, memberName], (error, response) => {
-      if (error) throw error;
-      console.log(`Added ${memberName} member to ${keyName} set`);
-    } )
+    const memberName = `${memberNameStartWith}${Math.random()}`;
+    members.push(memberName);
   }
+  client.sadd(keyName, members, (error, response) => {
+    if (error) throw error;
+    console.timeEnd(timeLabel);
+    process.exit();
+  });
 });
-
-function random(min, max) {
-  return Math.floor(min + Math.random() * (max - min));
-}
