@@ -40,26 +40,29 @@ const POPULATE_DB_WITH_ZSETS_СONFIG = {
 ### Running the scripts
 
 ```bash
-# Add strings to the databse
+# Add strings to the database
 $ node populate-db-with-strings.js
 
-# Add zsets to the databse
+# Add zsets to the database
 $ node populate-db-with-zsets.js
 
-# Add sets to the databse
+# Add sets to the database
 $ node populate-db-with-sets.js
 
 # Populate set with members
 $ node populate-set-with-members.js
 
-# Add hashes to the databse
+# Add hashes to the database
 $ node populate-db-with-hashes.js
 
 # Populate hash with fields
 $ node populate-hash-with-fields.js
 
-# Add lists to the databse
+# Add lists to the database
 $ node populate-db-with-lists.js
+
+# Add jsons to the database
+$ node populate-db-with-jsons.js
 
 # Populate zset with members
 $ node populate-zset-with-members.js
