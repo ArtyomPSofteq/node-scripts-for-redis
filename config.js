@@ -29,6 +29,11 @@ const POPULATE_DB_WITH_HASHES_СONFIG = {
   count: 10000,
 };
 
+const POPULATE_DB_WITH_JSONS_СONFIG = {
+  keyNameStartWith: 'jsonKey',
+  count: 10000,
+};
+
 const POPULATE_HASH_WITH_FIELDS_CONFIG = {
   keyName: 'hugeHash',
   fieldStartWith: 'abracadab',
@@ -76,4 +81,5 @@ module.exports = {
   POPULATE_SET_WITH_MEMBERS_CONFIG,
   POPULATE_DB_WITH_LISTS_СONFIG,
   POPULATE_LIST_WITH_ELEMENTS_CONFIG,
+  POPULATE_DB_WITH_JSONS_СONFIG,
 };
