@@ -9,6 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/redis": "^4.0.11",
+    "chromium-pickle-js": "^0.2.0",
+    "jsonpickle": "^1.1.2",
+    "msgpackr": "^1.6.1",
+    "protobufjs": "^7.0.0",
     "redis": "^3.0.2",
     "redis-rejson": "^1.0.0"
   }
