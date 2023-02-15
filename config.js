@@ -4,41 +4,48 @@ const DB_CONFIG = {
 }
 
 const POPULATE_DB_WITH_ZSETS_СONFIG = {
-  keyNameStartWith: 'zsetKey',
-  count: 10000,
+  keyNameStartWith: 'car',
+  count: 1000000,
 };
 
 const POPULATE_DB_WITH_SETS_СONFIG = {
-  keyNameStartWith: 'setKey',
-  count: 10000,
+  keyNameStartWith: 'book',
+  count: 1000000,
 };
 
 const POPULATE_DB_WITH_LISTS_СONFIG = {
-  keyNameStartWith: 'listKey',
-  count: 10000,
+  keyNameStartWith: 'building',
+  count: 15_000,
 };
 
 const POPULATE_DB_WITH_STRINGS_СONFIG = {
-  keyNameStartWith: 'tringedKey',
+  keyNameStartWith: 'comment',
   keyValue: 'stringValue',
-  count: 10000,
+  count: 1000000,
 };
 
 const POPULATE_DB_WITH_HASHES_СONFIG = {
-  keyNameStartWith: 'hashKey',
-  count: 10000,
+  keyNameStartWith: 'device',
+  count: 50_000,
 };
 
 const POPULATE_DB_WITH_JSONS_СONFIG = {
-  keyNameStartWith: 'jsonKey',
-  count: 10000,
+  keyNameStartWith: 'device',
+  count: 1000000,
 };
 
 const POPULATE_HASH_WITH_FIELDS_CONFIG = {
   keyName: 'hugeHash',
   fieldStartWith: 'abracadab',
   fieldValueStartWith: 'value',
-  fieldsCount: 10000,
+  fieldsCount: 5_000,
+};
+
+const POPULATE_STREAM_WITH_ENTRIES_CONFIG = {
+  keyName: 'hugeStream',
+  entryStartWith: 'entry',
+  entryValueStartWith: 'value',
+  entriesCount: 10000,
 };
 
 const POPULATE_ZSET_WITH_MEMBERS_CONFIG = {

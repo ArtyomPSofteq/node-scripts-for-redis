@@ -11,6 +11,7 @@
   "dependencies": {
     "@types/redis": "^4.0.11",
     "chromium-pickle-js": "^0.2.0",
+    "fflate": "^0.7.4",
     "jsonpickle": "^1.1.2",
     "msgpackr": "^1.6.1",
     "protobufjs": "^7.0.0",
