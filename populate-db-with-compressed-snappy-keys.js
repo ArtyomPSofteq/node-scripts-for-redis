@@ -1,11 +1,13 @@
 const redis = require('redis');
 const pickle = require('chromium-pickle-js');
 const msgpackr = require('msgpackr');
+const utf8 = require('@stablelib/utf8');
 const rejson = require('redis-rejson');
 const protobuf = require('protobufjs');
 const fs = require('fs');
-const ZstdCodec = require('zstd-codec').ZstdCodec;
 const { DB_CONFIG, POPULATE_DB_WITH_UNFORMATTED_KEYS } = require('./config');
+const fflate = require('fflate');
+const snappy = require('@stablelib/snappy');
 const { itemsKeyCount } = POPULATE_DB_WITH_UNFORMATTED_KEYS;
 
 rejson(redis);
@@ -14,7 +16,7 @@ const client = redis.createClient(DB_CONFIG);
 const timeLabel = `Time for adding unsupported format keys`;
 
 const COMPRESSED_PREFIX = 'Comp';
-const ZSTD_PREFIX = 'ZSTD';
+const SNAPPY_PREFIX = 'SNAPPY';
 
 client.on('error', function (error) {
   console.error(error);
@@ -28,7 +30,7 @@ client.on('connect', function () {
   // don't needed:
   // HEX, Binary
 
-  createZSTDCompressedKeys();
+  createSnappyCompressedKeys();
 
   console.timeEnd(timeLabel);
 
@@ -37,116 +39,97 @@ client.on('connect', function () {
   }, 1000);
 });
 
-const createZSTDCompressedKeys = () => {
-  createZSTDUnicodeKeys();
-  // createZSTDASCIIKeys();
-  // createZSTDJSONKeys();
-  // createZSTDPHPUnserializedJSONKeys();
-  // createZSTDMsgpackKeys();
-  // createZSTDProtobufKeys();
-  // createZSTDPickleKeys();
-  // createZSTDJavaSerializedObjectKeys();
+const createSnappyCompressedKeys = () => {
+  createSnappyUnicodeKeys();
+  createSnappyASCIIKeys();
+  createSnappyJSONKeys();
+  createSnappyPHPUnserializedJSONKeys();
+  createSnappyMsgpackKeys();
+  createSnappyProtobufKeys();
+  createSnappyPickleKeys();
+  createSnappyJavaSerializedObjectKeys();
 };
 
-// ZSTD
-const createZSTDUnicodeKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:Unicode:2`;
-  const rawValue = '2';
+// SNAPPY
+const createSnappyUnicodeKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:Unicode`;
+  const rawValue = '漢字';
 
-  ZstdCodec.run((zstd) => {
-    const simple = new zstd.Simple();
+  const buf = utf8.encode(rawValue);
+  const value = Buffer.from(snappy.compress(buf));
 
-    const valueBytes = new TextEncoder('utf-8').encode(rawValue);
-    const value = Buffer.from(simple.compress(valueBytes));
-
-    createString(prefix, value);
-    createSet(prefix, value, true);
-    createZSet(prefix, value, true);
-    createList(prefix, value, true);
-    createHash(prefix, value, true);
-    createStream(prefix, value, true);
-  });
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
 };
 
-const createZSTDASCIIKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:ASCII`;
+const createSnappyASCIIKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:ASCII`;
   const rawValue = '\xac\xed\x00\x05t\x0a4102';
+  const buf = fflate.strToU8(rawValue);
+  const value = Buffer.from(snappy.compress(buf));
 
-  ZstdCodec.run((zstd) => {
-    const simple = new zstd.Simple();
-
-    const valueBytes = new TextEncoder('utf-8').encode(rawValue);
-    const value = Buffer.from(simple.compress(valueBytes));
-
-    createString(prefix, value);
-    createSet(prefix, value, true);
-    createZSet(prefix, value, true);
-    createList(prefix, value, true);
-    createHash(prefix, value, true);
-    createStream(prefix, value, true);
-  });
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
 };
 
-const createZSTDJSONKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:JSON`;
+const createSnappyJSONKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:JSON`;
   const rawValue = '{"test":"test"}';
 
-  ZstdCodec.run((zstd) => {
-    const simple = new zstd.Simple();
+  const buf = fflate.strToU8(rawValue);
 
-    const valueBytes = new TextEncoder('utf-8').encode(rawValue);
-    const value = Buffer.from(simple.compress(valueBytes));
+  const value = Buffer.from(snappy.compress(buf));
 
-    createString(prefix, value);
-    createSet(prefix, value, true);
-    createZSet(prefix, value, true);
-    createList(prefix, value, true);
-    createHash(prefix, value, true);
-    createStream(prefix, value, true);
-  });
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
 };
 
-const createZSTDPHPUnserializedJSONKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:PHP`;
+const createSnappyPHPUnserializedJSONKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:PHP`;
   const rawValue = 'a:2:{i:0;s:12:"Sample array";i:1;a:2:{i:0;s:5:"Apple";i:1;s:6:"Orange";}}';
 
-  ZstdCodec.run((zstd) => {
-    const simple = new zstd.Simple();
+  const buf = fflate.strToU8(rawValue);
 
-    const valueBytes = new TextEncoder('utf-8').encode(rawValue);
-    const value = Buffer.from(simple.compress(valueBytes));
+  const value = Buffer.from(snappy.compress(buf));
 
-    createString(prefix, value);
-    createSet(prefix, value, true);
-    createZSet(prefix, value, true);
-    createList(prefix, value, true);
-    createHash(prefix, value, true);
-    createStream(prefix, value, true);
-  });
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
 };
 
-const createZSTDJavaSerializedObjectKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:Java`;
+const createSnappyJavaSerializedObjectKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:Java`;
   const rawValue = fs.readFileSync('./testFiles/test_serialised_obj.ser');
   const rawValue2 = fs.readFileSync('./testFiles/test_annotated_obj.ser');
 
-  ZstdCodec.run((zstd) => {
-    const simple = new zstd.Simple();
+  const value = Buffer.from(snappy.compress(rawValue));
+  const value2 = Buffer.from(snappy.compress(rawValue2));
 
-    const value = Buffer.from(simple.compress(rawValue));
-    const value2 = Buffer.from(simple.compress(rawValue2));
-
-    createString(prefix, value);
-    createSet(prefix, value, true, value2);
-    createZSet(prefix, value, true, value2);
-    createList(prefix, value, true, value2);
-    createHash(prefix, value, true, value2);
-    createStream(prefix, value, true, value2);
-  });
+  createString(prefix, value);
+  createSet(prefix, value, true, value2);
+  createZSet(prefix, value, true, value2);
+  createList(prefix, value, true, value2);
+  createHash(prefix, value, true, value2);
+  createStream(prefix, value, true, value2);
 };
 
-const createZSTDMsgpackKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:Msgpack`;
+const createSnappyMsgpackKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:Msgpack`;
   const rawValue = msgpackr.pack({
     hello: 'World',
     array: [1, 2],
@@ -154,22 +137,18 @@ const createZSTDMsgpackKeys = () => {
     boolean: false,
   });
 
-  ZstdCodec.run((zstd) => {
-    const simple = new zstd.Simple();
+  const value = Buffer.from(snappy.compress(rawValue));
 
-    const value = Buffer.from(simple.compress(rawValue));
-
-    createString(prefix, value);
-    createSet(prefix, value, true);
-    createZSet(prefix, value, true);
-    createList(prefix, value, true);
-    createHash(prefix, value, true);
-    createStream(prefix, value, true);
-  });
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
 };
 
-const createZSTDProtobufKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:Proto`;
+const createSnappyProtobufKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:Proto`;
 
   protobuf.load('./testFiles/awesome.proto', function (err, root) {
     if (err) throw err;
@@ -189,18 +168,15 @@ const createZSTDProtobufKeys = () => {
     // Encode a message to an Uint8Array (browser) or Buffer (node)
     const rawValue = Book.encode(message).finish();
 
-    ZstdCodec.run((zstd) => {
-      const simple = new zstd.Simple();
+    const value = Buffer.from(snappy.compress(rawValue));
+    // ... do something with buffer
 
-      const value = Buffer.from(simple.compress(rawValue));
-
-      createString(prefix, value);
-      createSet(prefix, value, true);
-      createZSet(prefix, value, true);
-      createList(prefix, value, true);
-      createHash(prefix, value, true);
-      createStream(prefix, value, true);
-    });
+    createString(prefix, value);
+    createSet(prefix, value, true);
+    createZSet(prefix, value, true);
+    createList(prefix, value, true);
+    createHash(prefix, value, true);
+    createStream(prefix, value, true);
   });
 
   // protobuf.load('./testFiles/protobuf2.proto', function (err, root) {
@@ -231,26 +207,21 @@ const createZSTDProtobufKeys = () => {
   // });
 };
 
-const createZSTDPickleKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:Pickle`;
+const createSnappyPickleKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:Pickle`;
 
   const rawValue = fs.readFileSync('./testFiles/pickleFile1.pickle');
   const value2 = fs.readFileSync('./testFiles/pickleFile2.pickle');
   // const value5 = fs.readFileSync('./pickleFile5.pickle');
 
-  ZstdCodec.run((zstd) => {
-    const simple = new zstd.Simple();
+  const value = Buffer.from(snappy.compress(rawValue));
 
-    const valueBytes = new TextEncoder('utf-8').encode(rawValue);
-    const value = Buffer.from(simple.compress(valueBytes));
-
-    createString(prefix, value);
-    createSet(prefix, value, true);
-    createZSet(prefix, value, true);
-    createList(prefix, value, true);
-    createHash(prefix, value, true);
-    createStream(prefix, value, true);
-  });
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
 };
 
 const createString = (prefix, value) => {
