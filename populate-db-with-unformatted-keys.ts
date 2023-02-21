@@ -183,7 +183,7 @@ const createPickleKeys = () => {
   const value2 = fs.readFileSync('./testFiles/pickleFile2.pickle');
   const value5 = fs.readFileSync('./pickleFile5.pickle');
 
-  createString(prefix, value5);
+  createString(prefix, value);
   createSet(prefix, value, true);
   createZSet(prefix, value, true);
   createList(prefix, value, true);

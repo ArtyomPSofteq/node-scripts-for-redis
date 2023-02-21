@@ -39,13 +39,13 @@ client.on('connect', function () {
 
 const createZSTDCompressedKeys = () => {
   createZSTDUnicodeKeys();
-  // createZSTDASCIIKeys();
-  // createZSTDJSONKeys();
-  // createZSTDPHPUnserializedJSONKeys();
-  // createZSTDMsgpackKeys();
-  // createZSTDProtobufKeys();
-  // createZSTDPickleKeys();
-  // createZSTDJavaSerializedObjectKeys();
+  createZSTDASCIIKeys();
+  createZSTDJSONKeys();
+  createZSTDPHPUnserializedJSONKeys();
+  createZSTDMsgpackKeys();
+  createZSTDProtobufKeys();
+  createZSTDPickleKeys();
+  createZSTDJavaSerializedObjectKeys();
 };
 
 // ZSTD
