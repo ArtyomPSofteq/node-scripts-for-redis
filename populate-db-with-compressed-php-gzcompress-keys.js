@@ -1,12 +1,12 @@
 const redis = require('redis');
 const pickle = require('chromium-pickle-js');
 const msgpackr = require('msgpackr');
+const utf8 = require('@stablelib/utf8');
 const rejson = require('redis-rejson');
 const protobuf = require('protobufjs');
 const fs = require('fs');
-const lz4js = require('lz4js');
 const { DB_CONFIG, POPULATE_DB_WITH_UNFORMATTED_KEYS } = require('./config');
-const fflate = require("fflate");
+const fflate = require('fflate');
 const { itemsKeyCount } = POPULATE_DB_WITH_UNFORMATTED_KEYS;
 
 rejson(redis);
@@ -15,13 +15,13 @@ const client = redis.createClient(DB_CONFIG);
 const timeLabel = `Time for adding unsupported format keys`;
 
 const COMPRESSED_PREFIX = 'Comp';
-const LZ4_PREFIX = 'LZ4';
+const GZLIB_PREFIX = 'GZLIB';
 
 client.on('error', function (error) {
   console.error(error);
 });
 
-client.on('connect', function () {
+client.on('connect', async function () {
   console.log('Connected to DB \n');
   console.time(timeLabel);
   // test();
@@ -29,7 +29,7 @@ client.on('connect', function () {
   // don't needed:
   // HEX, Binary
 
-  createLZ4CompressedKeys();
+  await createGZCompressCompressedKeys();
 
   console.timeEnd(timeLabel);
 
@@ -38,23 +38,24 @@ client.on('connect', function () {
   }, 1000);
 });
 
-const createLZ4CompressedKeys = () => {
-  createLZ4UnicodeKeys();
-  createLZ4ASCIIKeys();
-  createLZ4JSONKeys();
-  createLZ4PHPUnserializedJSONKeys();
-  createLZ4MsgpackKeys();
-  createLZ4ProtobufKeys();
-  createLZ4PickleKeys();
-  createLZ4JavaSerializedObjectKeys();
+const createGZCompressCompressedKeys = async () => {
+  await createGZCompressUnicodeKeys();
+  await createGZCompressASCIIKeys();
+  await createGZCompressJSONKeys();
+  await createGZCompressPHPUnserializedJSONKeys();
+  await createGZCompressMsgpackKeys();
+  await createGZCompressProtobufKeys();
+  await createGZCompressPickleKeys();
+  await createGZCompressJavaSerializedObjectKeys();
 };
 
-// LZ4
-const createLZ4UnicodeKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Unicode`;
+// GZCompress
+const createGZCompressUnicodeKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:Unicode`;
   const rawValue = '漢字';
-  const valueBytes = new TextEncoder('utf-8').encode(rawValue);
-  const value = Buffer.from(lz4js.compress(valueBytes));
+
+  const buf = fflate.strToU8(rawValue);
+  const value = Buffer.from(fflate.zlibSync(buf));
 
   createString(prefix, value);
   createSet(prefix, value, true);
@@ -64,12 +65,11 @@ const createLZ4UnicodeKeys = () => {
   createStream(prefix, value, true);
 };
 
-const createLZ4ASCIIKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:ASCII`;
+const createGZCompressASCIIKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:ASCII`;
   const rawValue = '\xac\xed\x00\x05t\x0a4102';
   const buf = fflate.strToU8(rawValue);
-
-  const value = Buffer.from(lz4js.compress(buf));
+  const value = Buffer.from(fflate.zlibSync(buf));
 
   createString(prefix, value);
   createSet(prefix, value, true);
@@ -79,13 +79,13 @@ const createLZ4ASCIIKeys = () => {
   createStream(prefix, value, true);
 };
 
-const createLZ4JSONKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:JSON`;
+const createGZCompressJSONKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:JSON`;
   const rawValue = '{"test":"test"}';
 
   const buf = fflate.strToU8(rawValue);
 
-  const value = Buffer.from(lz4js.compress(buf));
+  const value = Buffer.from(fflate.zlibSync(buf));
 
   createString(prefix, value);
   createSet(prefix, value, true);
@@ -95,13 +95,13 @@ const createLZ4JSONKeys = () => {
   createStream(prefix, value, true);
 };
 
-const createLZ4PHPUnserializedJSONKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:PHP`;
+const createGZCompressPHPUnserializedJSONKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:PHP`;
   const rawValue = 'a:2:{i:0;s:12:"Sample array";i:1;a:2:{i:0;s:5:"Apple";i:1;s:6:"Orange";}}';
 
   const buf = fflate.strToU8(rawValue);
 
-  const value = Buffer.from(lz4js.compress(buf));
+  const value = Buffer.from(fflate.zlibSync(buf));
 
   createString(prefix, value);
   createSet(prefix, value, true);
@@ -111,13 +111,13 @@ const createLZ4PHPUnserializedJSONKeys = () => {
   createStream(prefix, value, true);
 };
 
-const createLZ4JavaSerializedObjectKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Java`;
+const createGZCompressJavaSerializedObjectKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:Java`;
   const rawValue = fs.readFileSync('./testFiles/test_serialised_obj.ser');
   const rawValue2 = fs.readFileSync('./testFiles/test_annotated_obj.ser');
 
-  const value = Buffer.from(lz4js.compress(rawValue));
-  const value2 = Buffer.from(lz4js.compress(rawValue2));
+  const value = Buffer.from(fflate.zlibSync(rawValue));
+  const value2 = Buffer.from(fflate.zlibSync(rawValue));
 
   createString(prefix, value);
   createSet(prefix, value, true, value2);
@@ -127,8 +127,8 @@ const createLZ4JavaSerializedObjectKeys = () => {
   createStream(prefix, value, true, value2);
 };
 
-const createLZ4MsgpackKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Msgpack`;
+const createGZCompressMsgpackKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:Msgpack`;
   const rawValue = msgpackr.pack({
     hello: 'World',
     array: [1, 2],
@@ -136,7 +136,7 @@ const createLZ4MsgpackKeys = () => {
     boolean: false,
   });
 
-  const value = Buffer.from(lz4js.compress(rawValue));
+  const value = Buffer.from(fflate.zlibSync(rawValue));
 
   createString(prefix, value);
   createSet(prefix, value, true);
@@ -146,10 +146,10 @@ const createLZ4MsgpackKeys = () => {
   createStream(prefix, value, true);
 };
 
-const createLZ4ProtobufKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Proto`;
+const createGZCompressProtobufKeys = async () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:Proto`;
 
-  protobuf.load('./testFiles/awesome.proto', function (err, root) {
+  protobuf.load('./testFiles/awesome.proto',  function (err, root) {
     if (err) throw err;
 
     // Obtain a message type
@@ -167,7 +167,7 @@ const createLZ4ProtobufKeys = () => {
     // Encode a message to an Uint8Array (browser) or Buffer (node)
     const rawValue = Book.encode(message).finish();
 
-    const value = Buffer.from(lz4js.compress(rawValue));
+    const value = Buffer.from(fflate.zlibSync(rawValue));
     // ... do something with buffer
 
     createString(prefix, value);
@@ -206,14 +206,14 @@ const createLZ4ProtobufKeys = () => {
   // });
 };
 
-const createLZ4PickleKeys = () => {
-  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Pickle`;
+const createGZCompressPickleKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:Pickle`;
 
   const rawValue = fs.readFileSync('./testFiles/pickleFile1.pickle');
   const value2 = fs.readFileSync('./testFiles/pickleFile2.pickle');
   // const value5 = fs.readFileSync('./pickleFile5.pickle');
 
-  const value = Buffer.from(lz4js.compress(rawValue));
+  const value = Buffer.from(fflate.zlibSync(rawValue));
 
   createString(prefix, value);
   createSet(prefix, value, true);
