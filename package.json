@@ -9,12 +9,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@stablelib/snappy": "^1.0.2",
+    "@stablelib/utf8": "^1.0.1",
     "@types/redis": "^4.0.11",
+    "brotli-unicode": "^1.0.2",
     "chromium-pickle-js": "^0.2.0",
+    "fflate": "^0.7.4",
+    "fzstd": "^0.1.0",
     "jsonpickle": "^1.1.2",
+    "lz4js": "^0.2.0",
     "msgpackr": "^1.6.1",
     "protobufjs": "^7.0.0",
     "redis": "^3.0.2",
-    "redis-rejson": "^1.0.0"
+    "redis-rejson": "^1.0.0",
+    "zstd-codec": "^0.1.5"
   }
 }

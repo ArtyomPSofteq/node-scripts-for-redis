@@ -4,13 +4,18 @@ const msgpackr = require('msgpackr');
 const rejson = require('redis-rejson');
 const protobuf = require('protobufjs');
 const fs = require('fs');
+const lz4js = require('lz4js');
 const { DB_CONFIG, POPULATE_DB_WITH_UNFORMATTED_KEYS } = require('./config');
+const fflate = require('fflate');
 const { itemsKeyCount } = POPULATE_DB_WITH_UNFORMATTED_KEYS;
 
 rejson(redis);
 
 const client = redis.createClient(DB_CONFIG);
 const timeLabel = `Time for adding unsupported format keys`;
+
+const COMPRESSED_PREFIX = 'Comp';
+const LZ4_PREFIX = 'LZ4';
 
 client.on('error', function (error) {
   console.error(error);
@@ -24,50 +29,34 @@ client.on('connect', function () {
   // don't needed:
   // HEX, Binary
 
-  createASCIIKeys();
-  createUnicodeKeys();
-  createJSONKeys();
-  createPHPUnserializedKeys();
-  createJavaSerializedObjectKeys();
-  createMsgpackKeys();
-  createPickleKeys();
-  createProtobufKeys();
-  createVectorKeys();
+  createLZ4CompressedKeys();
 
   console.timeEnd(timeLabel);
 
   setTimeout(() => {
     process.exit();
-  }, 2000);
+  }, 1000);
 });
 
-const createASCIIKeys = () => {
-  const prefix = 'ASCII';
-  const value = '\xac\xed\x00\x05t\x0a4102';
-
-  createString(prefix, value);
-  createSet(prefix, value);
-  createZSet(prefix, value);
-  createList(prefix, value);
-  createHash(prefix, value);
-  createStream(prefix, value);
+const createLZ4CompressedKeys = () => {
+  createLZ4UnicodeKeys();
+  createLZ4ASCIIKeys();
+  createLZ4JSONKeys();
+  createLZ4PHPUnserializedJSONKeys();
+  createLZ4MsgpackKeys();
+  createLZ4ProtobufKeys();
+  createLZ4PickleKeys();
+  createLZ4JavaSerializedObjectKeys();
+  createLZ4VectorKeys();
 };
 
-const createUnicodeKeys = () => {
-  const prefix = 'Unicode';
-  const value = '漢字';
-
-  createString(prefix, value);
-  createSet(prefix, value);
-  createZSet(prefix, value);
-  createList(prefix, value);
-  createHash(prefix, value);
-  createStream(prefix, value);
-};
-
-const createJSONKeys = () => {
-  const prefix = 'JSON';
-  const value = '{"test":"test"}';
+// LZ4
+const createLZ4UnicodeKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Unicode`;
+  // const prefix = `Hello_World`;
+  const rawValue = '漢字';
+  const valueBytes = new TextEncoder('utf-8').encode(rawValue);
+  const value = Buffer.from(lz4js.compress(valueBytes));
 
   createString(prefix, value);
   createSet(prefix, value, true);
@@ -77,9 +66,12 @@ const createJSONKeys = () => {
   createStream(prefix, value, true);
 };
 
-const createPHPUnserializedKeys = () => {
-  const prefix = 'PHP';
-  const value = 'a:2:{i:0;s:12:"Sample array";i:1;a:2:{i:0;s:5:"Apple";i:1;s:6:"Orange";}}';
+const createLZ4ASCIIKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:ASCII`;
+  const rawValue = '\xac\xed\x00\x05t\x0a4102';
+  const buf = fflate.strToU8(rawValue);
+
+  const value = Buffer.from(lz4js.compress(buf));
 
   createString(prefix, value);
   createSet(prefix, value, true);
@@ -89,10 +81,45 @@ const createPHPUnserializedKeys = () => {
   createStream(prefix, value, true);
 };
 
-const createJavaSerializedObjectKeys = () => {
-  const prefix = 'Java';
-  const value = fs.readFileSync('./testFiles/test_serialised_obj.ser');
-  const value2 = fs.readFileSync('./testFiles/test_annotated_obj.ser');
+const createLZ4JSONKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:JSON`;
+  const rawValue = '{"test":"test"}';
+
+  const buf = fflate.strToU8(rawValue);
+
+  const value = Buffer.from(lz4js.compress(buf));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
+const createLZ4PHPUnserializedJSONKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:PHP`;
+  const rawValue = 'a:2:{i:0;s:12:"Sample array";i:1;a:2:{i:0;s:5:"Apple";i:1;s:6:"Orange";}}';
+
+  const buf = fflate.strToU8(rawValue);
+
+  const value = Buffer.from(lz4js.compress(buf));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
+const createLZ4JavaSerializedObjectKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Java`;
+  const rawValue = fs.readFileSync('./testFiles/test_serialised_obj.ser');
+  const rawValue2 = fs.readFileSync('./testFiles/test_annotated_obj.ser');
+
+  const value = Buffer.from(lz4js.compress(rawValue));
+  const value2 = Buffer.from(lz4js.compress(rawValue2));
 
   createString(prefix, value);
   createSet(prefix, value, true, value2);
@@ -102,27 +129,41 @@ const createJavaSerializedObjectKeys = () => {
   createStream(prefix, value, true, value2);
 };
 
-const createMsgpackKeys = () => {
-  const prefix = 'Msgpack';
-  // const value = msgpackr.pack([1]);
-  const value2 = msgpackr.pack([2]);
-  const value = msgpackr.pack({
+const createLZ4MsgpackKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Msgpack`;
+  const rawValue = msgpackr.pack({
     hello: 'World',
     array: [1, 2],
     obj: { test: 'test' },
     boolean: false,
   });
 
+  const value = Buffer.from(lz4js.compress(rawValue));
+
   createString(prefix, value);
-  createSet(prefix, value, true, value2);
-  createZSet(prefix, value, true, value2);
-  createList(prefix, value, true, value2);
-  createHash(prefix, value, true, value2);
-  createStream(prefix, value, true, value2);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
 };
 
-const createProtobufKeys = () => {
-  const prefix = 'Proto';
+const createLZ4VectorKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Vector`;
+  const rawValue = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
+
+  const value = Buffer.from(lz4js.compress(rawValue));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
+const createLZ4ProtobufKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Proto`;
 
   protobuf.load('./testFiles/awesome.proto', function (err, root) {
     if (err) throw err;
@@ -140,7 +181,9 @@ const createProtobufKeys = () => {
     const message = Book.create(payloadBookStore); // or use .fromObject if conversion is necessary
 
     // Encode a message to an Uint8Array (browser) or Buffer (node)
-    const value = Book.encode(message).finish();
+    const rawValue = Book.encode(message).finish();
+
+    const value = Buffer.from(lz4js.compress(rawValue));
     // ... do something with buffer
 
     createString(prefix, value);
@@ -179,26 +222,14 @@ const createProtobufKeys = () => {
   // });
 };
 
-const createVectorKeys = () => {
-  const prefix = 'Vector';
-  const vector = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
-  const value = Buffer.from(new Float32Array(vector));
+const createLZ4PickleKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Pickle`;
 
-  createString(prefix, value);
-  createSet(prefix, value, true);
-  createZSet(prefix, value, true);
-  createList(prefix, value, true);
-  createHash(prefix, value, true);
-  createStream(prefix, value, true);
-};
-
-
-const createPickleKeys = () => {
-  const prefix = 'Pickle';
-
-  const value = fs.readFileSync('./testFiles/pickleFile1.pickle');
+  const rawValue = fs.readFileSync('./testFiles/pickleFile1.pickle');
   const value2 = fs.readFileSync('./testFiles/pickleFile2.pickle');
   // const value5 = fs.readFileSync('./pickleFile5.pickle');
+
+  const value = Buffer.from(lz4js.compress(rawValue));
 
   createString(prefix, value);
   createSet(prefix, value, true);
@@ -294,8 +325,8 @@ const createStream = (prefix, value, onlyOneItem = false, value2 = '') => {
       '*',
       value,
       value,
-      `${(value2 || value) + 1}`,
-      `${(value2 || value) + 1}`,
+      `${value2 || value}1`,
+      `${value2 || value}1`,
       (error, response) => {
         if (error) throw error;
       }
