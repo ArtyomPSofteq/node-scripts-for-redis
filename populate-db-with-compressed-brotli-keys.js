@@ -48,6 +48,7 @@ const createBrotliCompressedKeys = async () => {
   await createBrotliProtobufKeys();
   await createBrotliPickleKeys();
   await createBrotliJavaSerializedObjectKeys();
+  await createBrotliVectorKeys();
 };
 
 // Brotli
@@ -69,6 +70,20 @@ const createBrotliUnicodeKeys = async () => {
 const createBrotliASCIIKeys = async () => {
   const prefix = `${COMPRESSED_PREFIX}:${BROTLI_PREFIX}:ASCII`;
   const rawValue = '\xac\xed\x00\x05t\x0a4102';
+  const buf = fflate.strToU8(rawValue);
+  const value = Buffer.from(await brotli.compress(buf));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
+const createBrotliVectorKeys = async () => {
+  const prefix = `${COMPRESSED_PREFIX}:${BROTLI_PREFIX}:Vector`;
+  const rawValue = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
   const buf = fflate.strToU8(rawValue);
   const value = Buffer.from(await brotli.compress(buf));
 

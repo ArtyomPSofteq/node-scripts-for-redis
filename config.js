@@ -5,51 +5,51 @@ const DB_CONFIG = {
 
 const POPULATE_DB_WITH_ZSETS_СONFIG = {
   keyNameStartWith: 'car',
-  count: 1000000,
+  count: 10000,
 };
 
 const POPULATE_DB_WITH_SETS_СONFIG = {
   keyNameStartWith: 'book',
-  count: 1000000,
+  count: 1000,
 };
 
 const POPULATE_DB_WITH_LISTS_СONFIG = {
   keyNameStartWith: 'building',
-  count: 15_000,
+  count: 1000,
 };
 
 const POPULATE_DB_WITH_STRINGS_СONFIG = {
   keyNameStartWith: 'comment',
   keyValue: 'stringValue',
-  count: 1000000,
+  count: 1000,
 };
 
 const POPULATE_DB_WITH_HASHES_СONFIG = {
   keyNameStartWith: 'device',
-  count: 50_000,
+  count: 1000,
 };
 
 const POPULATE_DB_WITH_JSONS_СONFIG = {
   keyNameStartWith: 'device',
-  count: 1000000,
+  count: 1000,
 };
 
 const POPULATE_HASH_WITH_FIELDS_CONFIG = {
-  keyName: 'hugeHash',
+  keyName: 'huge:Hash',
   fieldStartWith: 'abracadab',
   fieldValueStartWith: 'value',
-  fieldsCount: 5_000,
+  fieldsCount: 5000,
 };
 
 const POPULATE_STREAM_WITH_ENTRIES_CONFIG = {
-  keyName: 'hugeStream',
+  keyName: 'huge:Stream',
   entryStartWith: 'entry',
   entryValueStartWith: 'value',
   entriesCount: 10000,
 };
 
 const POPULATE_ZSET_WITH_MEMBERS_CONFIG = {
-  keyName: 'hugeZSet',
+  keyName: 'huge:ZSet',
   memberNameStartWith: 'member',
   // The Score will be generated as an integer ranging from minScoreValue to maxScoreValue
   minScoreValue: -10,
@@ -58,15 +58,15 @@ const POPULATE_ZSET_WITH_MEMBERS_CONFIG = {
 };
 
 const POPULATE_SET_WITH_MEMBERS_CONFIG = {
-  keyName: 'hugeSet',
+  keyName: 'huge:Set',
   memberNameStartWith: 'blamember',
   membersCount: 10000,
 };
 
 const POPULATE_LIST_WITH_ELEMENTS_CONFIG = {
-  keyName: 'hugeList',
+  keyName: 'huge:List',
   elementStartWith: 'blaelem',
-  elementsCount: 100000,
+  elementsCount: 10000,
 };
 
 const POPULATE_DB_WITH_UNFORMATTED_KEYS = {

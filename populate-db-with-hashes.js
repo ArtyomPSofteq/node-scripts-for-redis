@@ -17,11 +17,15 @@ client.on('connect', function () {
     const keyName = `${keyNameStartWith}:${i + 1}`;
 
     //Hashes
-    client.hset([`${keyName}`, 'field1', 'Hello'], (error, response) => {
+    client.hset([`${keyName}`, 'field1', 'Hello', 'flield2', 'value2', 'field3', 'value3'], (error, response) => {
       if (error) throw error;
       // console.timeEnd(timeLabel);
       // process.exit();
     });
+
+    setTimeout(() => {
+      process.exit();
+    }, 1000);
 
     // Lists
     // client.lpush([`${keyName}:device`, 'element'], (error, response) => {

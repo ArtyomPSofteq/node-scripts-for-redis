@@ -47,6 +47,7 @@ const createGZCompressCompressedKeys = async () => {
   await createGZCompressProtobufKeys();
   await createGZCompressPickleKeys();
   await createGZCompressJavaSerializedObjectKeys();
+  await createGZCompressVectorKeys();
 };
 
 // GZCompress
@@ -135,6 +136,20 @@ const createGZCompressMsgpackKeys = () => {
     obj: { test: 'test' },
     boolean: false,
   });
+
+  const value = Buffer.from(fflate.zlibSync(rawValue));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
+const createGZCompressVectorKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZLIB_PREFIX}:Vector`;
+  const rawValue = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
 
   const value = Buffer.from(fflate.zlibSync(rawValue));
 

@@ -32,6 +32,7 @@ client.on('connect', function () {
   createMsgpackKeys();
   createPickleKeys();
   createProtobufKeys();
+  createVectorKeys();
 
   console.timeEnd(timeLabel);
 
@@ -103,6 +104,8 @@ const createJavaSerializedObjectKeys = () => {
 
 const createMsgpackKeys = () => {
   const prefix = 'Msgpack';
+  // const value = msgpackr.pack([1]);
+  const value2 = msgpackr.pack([2]);
   const value = msgpackr.pack({
     hello: 'World',
     array: [1, 2],
@@ -111,11 +114,11 @@ const createMsgpackKeys = () => {
   });
 
   createString(prefix, value);
-  createSet(prefix, value, true);
-  createZSet(prefix, value, true);
-  createList(prefix, value, true);
-  createHash(prefix, value, true);
-  createStream(prefix, value, true);
+  createSet(prefix, value, true, value2);
+  createZSet(prefix, value, true, value2);
+  createList(prefix, value, true, value2);
+  createHash(prefix, value, true, value2);
+  createStream(prefix, value, true, value2);
 };
 
 const createProtobufKeys = () => {
@@ -176,12 +179,26 @@ const createProtobufKeys = () => {
   // });
 };
 
+const createVectorKeys = () => {
+  const prefix = 'Vector';
+  const vector = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
+  const value = Buffer.from(new Float32Array(vector));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
+
 const createPickleKeys = () => {
   const prefix = 'Pickle';
 
   const value = fs.readFileSync('./testFiles/pickleFile1.pickle');
   const value2 = fs.readFileSync('./testFiles/pickleFile2.pickle');
-  const value5 = fs.readFileSync('./pickleFile5.pickle');
+  // const value5 = fs.readFileSync('./pickleFile5.pickle');
 
   createString(prefix, value);
   createSet(prefix, value, true);

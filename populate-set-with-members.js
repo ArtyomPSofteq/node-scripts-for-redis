@@ -13,10 +13,8 @@ client.on('connect', function () {
   console.log('Connected to DB \n');
   console.time(timeLabel);
   const members = [];
-  const postfix = Array.from({ length: 100 }, (_, i) => `key${i}`).toString();
-  console.log('postfix', postfix);
   for (let i = 0; i < membersCount; i++) {
-    const memberName = `${memberNameStartWith}${Math.random()}${postfix}`;
+    const memberName = `${memberNameStartWith}${Math.random()}`;
     members.push(memberName);
   }
   client.sadd(keyName, members, (error, response) => {

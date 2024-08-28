@@ -46,6 +46,7 @@ const createGZIPCompressedKeys = () => {
   createGZIPProtobufKeys();
   createGZIPPickleKeys();
   createGZIPJavaSerializedObjectKeys();
+  createGZIPVectorKeys();
 };
 
 const createGZIPUnicodeKeys = () => {
@@ -145,6 +146,20 @@ const createGZIPMsgpackKeys = () => {
   createStream(prefix, value, true);
 };
 
+const createGZIPVectorKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${GZIP_PREFIX}:Vector`;
+  const rawValue = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
+
+  const value = Buffer.from(fflate.compressSync(rawValue));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
 const createGZIPProtobufKeys = () => {
   const prefix = `${COMPRESSED_PREFIX}:${GZIP_PREFIX}:Proto`;
 
@@ -197,11 +212,11 @@ const createGZIPProtobufKeys = () => {
   //   const value = AwesomeMessage.encode(message).finish();
   //   // ... do something with buffer
 
-  //   createSet(prefix, value, true);
-  //   createZSet(prefix, value, true);
-  //   createList(prefix, value, true);
-  //   createHash(prefix, value, true);
-  //   createStream(prefix, value, true);
+    // createSet(prefix, value, true);
+    // createZSet(prefix, value, true);
+    // createList(prefix, value, true);
+    // createHash(prefix, value, true);
+    // createStream(prefix, value, true);
   // });
 };
 

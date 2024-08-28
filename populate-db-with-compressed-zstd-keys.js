@@ -46,6 +46,7 @@ const createZSTDCompressedKeys = () => {
   createZSTDProtobufKeys();
   createZSTDPickleKeys();
   createZSTDJavaSerializedObjectKeys();
+  createZSTDVectorKeys();
 };
 
 // ZSTD
@@ -153,6 +154,24 @@ const createZSTDMsgpackKeys = () => {
     obj: { test: 'test' },
     boolean: false,
   });
+
+  ZstdCodec.run((zstd) => {
+    const simple = new zstd.Simple();
+
+    const value = Buffer.from(simple.compress(rawValue));
+
+    createString(prefix, value);
+    createSet(prefix, value, true);
+    createZSet(prefix, value, true);
+    createList(prefix, value, true);
+    createHash(prefix, value, true);
+    createStream(prefix, value, true);
+  });
+};
+
+const createZSTDVectorKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${ZSTD_PREFIX}:Vector`;
+  const rawValue = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
 
   ZstdCodec.run((zstd) => {
     const simple = new zstd.Simple();

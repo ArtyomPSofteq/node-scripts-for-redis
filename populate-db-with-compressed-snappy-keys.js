@@ -48,6 +48,7 @@ const createSnappyCompressedKeys = () => {
   createSnappyProtobufKeys();
   createSnappyPickleKeys();
   createSnappyJavaSerializedObjectKeys();
+  createSnappyVectorKeys();
 };
 
 // SNAPPY
@@ -136,6 +137,20 @@ const createSnappyMsgpackKeys = () => {
     obj: { test: 'test' },
     boolean: false,
   });
+
+  const value = Buffer.from(snappy.compress(rawValue));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
+const createSnappyVectorKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${SNAPPY_PREFIX}:Vector`;
+  const rawValue = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
 
   const value = Buffer.from(snappy.compress(rawValue));
 

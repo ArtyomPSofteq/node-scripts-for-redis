@@ -47,6 +47,7 @@ const createLZ4CompressedKeys = () => {
   createLZ4ProtobufKeys();
   createLZ4PickleKeys();
   createLZ4JavaSerializedObjectKeys();
+  createLZ4VectorKeys();
 };
 
 // LZ4
@@ -136,6 +137,20 @@ const createLZ4MsgpackKeys = () => {
     obj: { test: 'test' },
     boolean: false,
   });
+
+  const value = Buffer.from(lz4js.compress(rawValue));
+
+  createString(prefix, value);
+  createSet(prefix, value, true);
+  createZSet(prefix, value, true);
+  createList(prefix, value, true);
+  createHash(prefix, value, true);
+  createStream(prefix, value, true);
+};
+
+const createLZ4VectorKeys = () => {
+  const prefix = `${COMPRESSED_PREFIX}:${LZ4_PREFIX}:Vector`;
+  const rawValue = JSON.parse(fs.readFileSync('./testFiles/vector.json', 'utf8'));
 
   const value = Buffer.from(lz4js.compress(rawValue));
 
