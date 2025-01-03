@@ -13,6 +13,7 @@
     "@stablelib/utf8": "^1.0.1",
     "@types/redis": "^4.0.11",
     "brotli-unicode": "^1.0.2",
+    "brotli-wasm": "^3.0.1",
     "chromium-pickle-js": "^0.2.0",
     "fflate": "^0.7.4",
     "fzstd": "^0.1.0",
